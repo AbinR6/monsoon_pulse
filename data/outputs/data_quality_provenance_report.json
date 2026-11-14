@@ -1,0 +1,64 @@
+{
+  "audit_timestamp": "2026-11-14T19:57:38.914471",
+  "variables_audited": {
+    "precipitation": {
+      "variable": "precipitation_mm",
+      "total_records": 122724,
+      "valid_records": 122724,
+      "missing_records": 0,
+      "completeness_pct": 100.0,
+      "out_of_bounds_low": 0,
+      "out_of_bounds_high": 0,
+      "physical_min_allowed": 0.0,
+      "physical_max_allowed": 800.0,
+      "unit": "mm/day",
+      "is_valid": true
+    },
+    "land_surface_temperature": {
+      "variable": "lst_celsius",
+      "total_records": 15344,
+      "valid_records": 14949,
+      "missing_records": 395,
+      "completeness_pct": 97.43,
+      "out_of_bounds_low": 0,
+      "out_of_bounds_high": 0,
+      "physical_min_allowed": 5.0,
+      "physical_max_allowed": 52.0,
+      "unit": "\u00b0C",
+      "is_valid": true
+    },
+    "vegetation_ndvi": {
+      "variable": "ndvi",
+      "total_records": 7672,
+      "valid_records": 7503,
+      "missing_records": 169,
+      "completeness_pct": 97.8,
+      "out_of_bounds_low": 0,
+      "out_of_bounds_high": 0,
+      "physical_min_allowed": -0.2,
+      "physical_max_allowed": 1.0,
+      "unit": "dimensionless",
+      "is_valid": true
+    },
+    "rootzone_soil_moisture": {
+      "variable": "soil_moisture_m3_m3",
+      "total_records": 51142,
+      "valid_records": 51142,
+      "missing_records": 0,
+      "completeness_pct": 100.0,
+      "out_of_bounds_low": 0,
+      "out_of_bounds_high": 0,
+      "physical_min_allowed": 0.0,
+      "physical_max_allowed": 0.65,
+      "unit": "m^3/m^3",
+      "is_valid": true
+    }
+  },
+  "terrain_summary": {
+    "districts_count": 14,
+    "min_slope_deg": 0.82,
+    "max_slope_deg": 18.65,
+    "highest_elevation_district": "Idukki",
+    "steepest_district": "Idukki"
+  }
+}
