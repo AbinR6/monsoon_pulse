@@ -36,9 +36,13 @@ export default function App() {
       try {
         setLoading(true);
         // Load production analytical JSON and district GeoJSON
+        const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+          ? import.meta.env.BASE_URL
+          : `${import.meta.env.BASE_URL}/`;
+
         const [dashRes, geoRes] = await Promise.all([
-          fetch('/data/monsoon_pulse_dashboard_data.json'),
-          fetch('/data/kerala_districts.geojson')
+          fetch(`${baseUrl}data/monsoon_pulse_dashboard_data.json`),
+          fetch(`${baseUrl}data/kerala_districts.geojson`)
         ]);
 
         if (!dashRes.ok) {

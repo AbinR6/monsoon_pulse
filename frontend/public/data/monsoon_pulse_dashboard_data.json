@@ -3,7 +3,7 @@
   "challenge": "NASA Space Apps Challenge 2026: Be An Earth System Trend Detective!",
   "study_area": "Kerala, India (14 Districts)",
   "observation_window": "2001\u20132024 (SMAP: 2015\u20132024)",
-  "generated_at": "2026-11-14T19:57:43.587565",
+  "generated_at": "2026-11-15T19:14:27.560890",
   "metadata": {
     "author": "Monsoon Pulse Engineering Agent",
     "license": "Apache 2.0 Open Source",
@@ -10904,7 +10904,7 @@
     }
   ],
   "data_quality_report": {
-    "audit_timestamp": "2026-11-14T19:57:38.914471",
+    "audit_timestamp": "2026-11-15T19:14:26.419182",
     "variables_audited": {
       "precipitation": {
         "variable": "precipitation_mm",

@@ -2,6 +2,7 @@
 ### Satellite-Based Earth-System Trend Detection & Environmental Intelligence Platform
 **Event:** NASA Space Apps Challenge 2026  
 **Challenge Statement:** [Be An Earth System Trend Detective!](https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/)  
+**Live Web Application:** [https://abinr6.github.io/monsoon_pulse/](https://abinr6.github.io/monsoon_pulse/)  
 **Study Region:** Kerala, India (All 14 Administrative Districts)  
 **Observation Window:** 2001–2024 (NASA SMAP: 2015–2024)  
 **License:** [Apache 2.0 Open Source](LICENSE)  

@@ -100,3 +100,25 @@
    - Configured hosting (`firebase.json`, `.firebaserc`, `vercel.json`).
    - Verified production build and local preview server at `http://127.0.0.1:4173/` (HTTP 200 on all endpoints).
    - Initialized Git repository and committed complete project codebase.
+
+---
+
+## Log Entry 05: GitHub Pages Free Public Frontend Hosting Configuration
+- **Timestamp:** 2026-11-15T19:23:00+05:30
+- **Scope:** Public Deployment via GitHub Pages & GitHub Actions Automation
+- **Status:** Complete & Production Ready
+
+### Completed Work:
+1. **Vite Base Path Configuration**:
+   - Updated `frontend/vite.config.js` with `base: '/monsoon_pulse/'`.
+   - Verified that all asset links in production HTML and JS (`/monsoon_pulse/assets/...`, `/monsoon_pulse/favicon.svg`) correctly resolve under the GitHub Pages subpath.
+2. **Data Fetching Harmonization**:
+   - Updated `frontend/src/App.jsx` to dynamically prepend `import.meta.env.BASE_URL` to `/data/monsoon_pulse_dashboard_data.json` and `/data/kerala_districts.geojson`, preventing 404s on GitHub Pages.
+3. **GitHub Pages SPA Fallback**:
+   - Enhanced `frontend/package.json` build script to automatically generate `dist/404.html` from `dist/index.html` via Node.js cross-platform file copy, ensuring full client-side route persistence on refresh.
+4. **GitHub Actions Workflow**:
+   - Engineered `.github/workflows/deploy.yml` with triggers on push to `master` and `workflow_dispatch`.
+   - Configured official GitHub Pages actions (`actions/upload-pages-artifact@v3`, `actions/deploy-pages@v4`) with minimum required permissions (`contents: read`, `pages: write`, `id-token: write`).
+5. **Local Production Preview Verification**:
+   - Built frontend bundle in 307ms.
+   - Verified all endpoints on `http://127.0.0.1:4173/monsoon_pulse/` returning HTTP 200.
