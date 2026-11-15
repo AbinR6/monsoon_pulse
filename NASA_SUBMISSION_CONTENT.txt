@@ -47,13 +47,15 @@ FIELD 3: PROJECT DEMONSTRATION LINK
 [Requirement: Publicly accessible URL to a <=7 slide presentation or <=30s video,
 with no password, login, permission, or registration required.]
 
-Demo URL (Public Cloud Storage — Google Drive / OneDrive / Dropbox):
-[PASTE YOUR PUBLIC SHARE LINK HERE, e.g.: https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing]
+Demo URL (Direct GitHub Repository Link — PDF):
+https://raw.githubusercontent.com/AbinR6/monsoon_pulse/master/MONSOON_PULSE_ARCHON.pdf
 
-Guidelines for Demo Link:
-1. Upload your 7-slide presentation (PDF or PPTX) to Google Drive, Microsoft OneDrive, or Dropbox.
-2. Set access permission to: "Anyone with the link can view" (no login/password required).
-3. Paste the full public URL into Field 3 on the NASA Space Apps submission form.
+Demo URL (Direct GitHub Repository Link — PPTX):
+https://github.com/AbinR6/monsoon_pulse/blob/master/MONSOON_PULSE_ARCHON.pptx
+
+Alternative Cloud Link (Google Drive / OneDrive / Dropbox):
+[If preferred, you may also upload the file to Google Drive, Dropbox, or OneDrive
+with "Anyone with the link can view" enabled and paste that link here.]
 
 
 --------------------------------------------------------------------------------
