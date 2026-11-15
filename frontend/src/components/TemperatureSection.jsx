@@ -101,14 +101,20 @@ export default function TemperatureSection({ districtData, selectedDistrict }) {
 
         <StatCard
           title="Statistical Significance"
-          value={stats?.significance_class?.includes('Significant') ? 'Significant' : 'Moderate'}
+          value={
+            stats?.q_value !== undefined && stats?.q_value < 0.05
+              ? 'FDR Significant'
+              : stats?.p_value !== undefined && stats?.p_value < 0.05
+              ? 'Marginal (Unadj Sig)'
+              : 'Not Significant'
+          }
           unit=""
-          subtitle={`FDR-adjusted (q = ${stats?.q_value})`}
+          subtitle={`FDR-adjusted (q = ${stats?.q_value ?? '—'})`}
           icon={ShieldCheck}
-          color="emerald"
+          color={stats?.q_value < 0.05 ? "emerald" : "amber"}
           trendBadge={
             <span className="text-xs text-slate-400 font-mono">
-              Kendall's &tau;: {stats?.kendalls_tau} • Z: {stats?.z_statistic}
+              Kendall's &tau;: {stats?.kendalls_tau ?? '—'} • Z: {stats?.z_statistic ?? '—'}
             </span>
           }
         />
@@ -122,7 +128,7 @@ export default function TemperatureSection({ districtData, selectedDistrict }) {
               Historical Daytime Land Surface Temperature ({selectedDistrict})
             </h3>
             <p className="text-xs text-slate-400">
-              Long-term warming trend with marked peak during the 2016 severe regional drought.
+              MODIS MOD11A2 1km daytime thermal observations (2001–2024). Note elevation-dependent baseline cooling in the Ghats and regional drought peaks.
             </p>
           </div>
         </div>
@@ -132,11 +138,20 @@ export default function TemperatureSection({ districtData, selectedDistrict }) {
             <ComposedChart data={timeSeries} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="year" stroke="#64748b" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#f43f5e" tick={{ fontSize: 11 }} domain={['dataMin - 1', 'dataMax + 1']} label={{ value: 'Daytime LST (°C)', angle: -90, position: 'insideLeft', fill: '#f43f5e', fontSize: 11 }} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} />
+              <YAxis 
+                stroke="#f43f5e" 
+                tick={{ fontSize: 11 }} 
+                domain={['dataMin - 1', 'dataMax + 1']} 
+                tickFormatter={(val) => Number(val).toFixed(1)}
+                label={{ value: 'Daytime LST (°C)', angle: -90, position: 'insideLeft', fill: '#f43f5e', fontSize: 11 }} 
+              />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} 
+                formatter={(val) => [Number(val).toFixed(2) + ' °C', 'Daytime LST']}
+              />
               <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-              <Area type="monotone" dataKey="lst_celsius" name="Daytime LST (°C)" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.15} />
-              <Line type="monotone" dataKey="lst_celsius" name="LST Trend Line" stroke="#fb7185" strokeWidth={3} dot={{ r: 4 }} />
+              <Area type="monotone" dataKey="lst_celsius" name="Daytime LST (°C)" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.15} connectNulls={false} />
+              <Line type="monotone" dataKey="lst_celsius" name="LST Trend Line" stroke="#fb7185" strokeWidth={3} dot={{ r: 4 }} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

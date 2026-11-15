@@ -70,15 +70,28 @@ export default function RteSection({ districtData, selectedDistrict, allDistrict
       </div>
 
       {/* Scientific Screening Disclaimer Alert */}
-      <div className="bg-amber-950/40 border border-amber-800/60 rounded-xl p-4 text-xs text-amber-200 flex items-start gap-3">
-        <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-        <p className="leading-relaxed">
-          <strong>Scientific Scope & Methodology Disclaimer:</strong> The Rainfall-Terrain Exposure (RTE) index is a 
-          <strong> geographical screening indicator</strong> designed to quantify where extreme orographic monsoon precipitation 
-          coincides with steep slope gradients. It is <em>not</em> a direct measurement of geotechnical landslide probability 
-          nor proof of landslide occurrence. Localized slope failures depend on soil lithology, regolith thickness, pore-water pressure, 
-          and human land-use alterations.
-        </p>
+      <div className="space-y-3">
+        <div className="bg-amber-950/40 border border-amber-800/60 rounded-xl p-4 text-xs text-amber-200 flex items-start gap-3">
+          <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong>Scientific Scope & Methodology Disclaimer:</strong> The Rainfall-Terrain Exposure (RTE) index is a 
+            <strong> geographical screening indicator</strong> designed to quantify where extreme orographic monsoon precipitation 
+            coincides with steep slope gradients. It is <em>not</em> a direct measurement of geotechnical landslide probability 
+            nor proof of landslide occurrence. Localized slope failures depend on soil lithology, regolith thickness, pore-water pressure, 
+            and human land-use alterations.
+          </p>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 flex items-start gap-3">
+          <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong>Mathematical Slope Normalization Boundary Behavior:</strong> When a district possesses the minimum regional slope 
+            (such as <strong>Alappuzha</strong>, S_d = 0.82°, S_norm = 0.00), the compound RTE is forced to 0.0 by definition 
+            (RTE = Z_R95p &times; 0 = 0). This mathematical boundary indicates <em>near-zero topographical slope hazard</em>, 
+            <strong> not an absence of extreme rainfall</strong>. Lowland wetland flooding exposure is tracked independently via 
+            raw extreme rainfall (R95p and PRCPTOT).
+          </p>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -167,7 +180,7 @@ export default function RteSection({ districtData, selectedDistrict, allDistrict
               <ReferenceLine y={0.5} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'Elevated Exposure (+0.5)', fill: '#f59e0b', fontSize: 10 }} />
 
               <Bar dataKey="z_r95p_jjas" name="Rainfall Anomaly (Z_R95p,JJAS)" fill="#0ea5e9" opacity={0.65} />
-              <Line type="monotone" dataKey="rte" name="RTE Compound Exposure" stroke="#10b981" strokeWidth={3.5} dot={{ r: 4, fill: '#10b981' }} />
+              <Line type="monotone" dataKey="rte" name="RTE Compound Exposure" stroke="#10b981" strokeWidth={3.5} dot={{ r: 4, fill: '#10b981' }} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

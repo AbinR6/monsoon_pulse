@@ -7,13 +7,17 @@ Mathematical Formulation:
     S = sum_{i=1}^{n-1} sum_{j=i+1}^n sgn(x_j - x_i)
 - Variance with tie correction:
     Var(S) = (1/18) * [ n(n-1)(2n+5) - sum_t t(t-1)(2t+5) ]
-- Standardized test statistic Z:
-    Z = (S - 1) / sqrt(Var(S))   if S > 0
-    Z = 0                        if S == 0
-    Z = (S + 1) / sqrt(Var(S))   if S < 0
+- Modified Mann-Kendall with Yue & Wang (2004) Variance Correction:
+    When serial autocorrelation is statistically significant in the detrended series,
+    the variance of S is adjusted by the variance correction factor eta:
+        eta = 1 + [ 2 / (n(n-1)(n-2)) ] * sum_{k=1}^{n-1} (n - k)(n - k - 1)(n - k - 2) * r_k
+        Var*(S) = eta * Var(S)
+- Standardized test statistic Z*:
+    Z* = (S - 1) / sqrt(Var*(S))   if S > 0
+    Z* = 0                         if S == 0
+    Z* = (S + 1) / sqrt(Var*(S))   if S < 0
 - Two-tailed p-value:
-    p = 2 * (1 - Phi(|Z|))
-- Includes Modified Mann-Kendall variance correction for serial correlation (Yue & Wang / Hamed & Rao).
+    p = 2 * (1 - Phi(|Z*|))
 """
 
 from typing import Dict, List, Any, Optional, Tuple, Union
@@ -25,11 +29,13 @@ def mann_kendall_test(
     x: Union[List[float], np.ndarray], 
     alpha: float = 0.05,
     modified_for_autocorr: bool = False,
+    variance_correction_factor_eta: float = 1.0,
     lag1_autocorr: float = 0.0
 ) -> Dict[str, Any]:
     """
     Execute the Mann-Kendall non-parametric trend test.
     Handles tied groups and missing values (dropped before calculation).
+    Supports full Yue & Wang (2004) variance correction factor (eta).
     """
     series = np.asarray(x, dtype=float)
     valid_mask = ~np.isnan(series)
@@ -41,6 +47,8 @@ def mann_kendall_test(
             "n_observations": n,
             "s_statistic": 0.0,
             "var_s": 0.0,
+            "var_s_star": 0.0,
+            "eta_factor": 1.0,
             "z_statistic": 0.0,
             "p_value": 1.0,
             "kendalls_tau": 0.0,
@@ -62,14 +70,12 @@ def mann_kendall_test(
 
     var_s = (n * (n - 1) * (2 * n + 5) - tie_term) / 18.0
 
-    # Modified Mann-Kendall variance inflation factor for serial autocorrelation
-    if modified_for_autocorr and abs(lag1_autocorr) > 0.1:
-        # Variance correction factor (Yue & Wang 2004)
-        n_eff_factor = 1.0 + 2.0 * (lag1_autocorr / (1.0 - lag1_autocorr)) * (1.0 - (1.0 / n))
-        var_s = var_s * max(n_eff_factor, 1.0)
+    # Apply Yue & Wang (2004) variance correction factor
+    eta = max(1.0, float(variance_correction_factor_eta)) if modified_for_autocorr else 1.0
+    var_s_star = var_s * eta
 
-    # Standardized test statistic Z
-    std_s = np.sqrt(var_s)
+    # Standardized test statistic Z*
+    std_s = np.sqrt(var_s_star)
     if s > 0:
         z = (s - 1.0) / std_s
     elif s < 0:
@@ -95,6 +101,8 @@ def mann_kendall_test(
         "n_observations": int(n),
         "s_statistic": float(s),
         "var_s": float(var_s),
+        "var_s_star": float(var_s_star),
+        "eta_factor": round(float(eta), 4),
         "z_statistic": round(float(z), 4),
         "p_value": round(float(p_value), 5),
         "kendalls_tau": round(float(tau), 4),

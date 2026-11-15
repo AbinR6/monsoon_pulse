@@ -1,5 +1,5 @@
 """
-Theil–Sen Robust Trend Slope Estimator & Confidence Intervals
+Theil–Sen Robust Trend Slope Estimator & Consistent Confidence Intervals
 NASA Space Apps Challenge 2026: Be An Earth System Trend Detective!
 
 Mathematical Formulation:
@@ -9,13 +9,15 @@ Mathematical Formulation:
     alpha = median(y_i - beta * x_i)
 - Non-parametric rank-based confidence interval (Gilbert 1987 / Sen 1968):
     N' = n * (n - 1) / 2
-    C_alpha = Z_{1 - alpha/2} * sqrt(Var(S))
-    M1 = int((N' - C_alpha) / 2)
-    M2 = int((N' + C_alpha) / 2) + 1
+    C_alpha = Z_{1 - alpha/2} * sqrt(Var*(S))
+    M1 = max(0, int((N' - C_alpha) / 2))
+    M2 = min(N' - 1, int((N' + C_alpha) / 2))
     CI_lower = slopes_sorted[M1]
     CI_upper = slopes_sorted[M2]
-- Decadal rate of change: beta * 10
-- Percent change over observation window: (beta * total_years / mean_y) * 100%
+- Consistent Variance Procedure:
+    When serial autocorrelation adjustment (Yue & Wang 2004) is applied to Mann-Kendall,
+    Var*(S) = eta * Var(S) is used directly in the rank confidence limits C_alpha.
+    This guarantees methodological consistency between the significance test and CI width.
 """
 
 from typing import Dict, List, Any, Optional, Tuple, Union
@@ -26,10 +28,14 @@ from scipy import stats
 def theil_sen_estimator(
     y: Union[List[float], np.ndarray],
     x: Optional[Union[List[float], np.ndarray]] = None,
-    alpha: float = 0.05
+    alpha: float = 0.05,
+    var_s_override: Optional[float] = None,
+    eta_factor: float = 1.0
 ) -> Dict[str, Any]:
     """
     Compute Theil-Sen robust slope estimator with non-parametric confidence intervals.
+    Supports variance adjustment override to maintain mathematical consistency
+    with Modified Mann-Kendall test.
     """
     y_arr = np.asarray(y, dtype=float)
     if x is None:
@@ -53,6 +59,7 @@ def theil_sen_estimator(
             "intercept": 0.0,
             "pct_change_total": 0.0,
             "mean_value": float(np.mean(y_clean)) if n > 0 else 0.0,
+            "var_s_used": 0.0,
             "alpha": alpha
         }
 
@@ -76,6 +83,7 @@ def theil_sen_estimator(
             "intercept": float(np.median(y_clean)),
             "pct_change_total": 0.0,
             "mean_value": float(np.mean(y_clean)),
+            "var_s_used": 0.0,
             "alpha": alpha
         }
 
@@ -87,16 +95,21 @@ def theil_sen_estimator(
     intercept = float(np.median(y_clean - median_slope * x_clean))
 
     # Calculate Kendall's Var(S) for confidence interval bounds
-    unique_vals, counts = np.unique(y_clean, return_counts=True)
-    ties = counts[counts > 1]
-    tie_term = np.sum(ties * (ties - 1) * (2 * ties + 5))
-    var_s = (n * (n - 1) * (2 * n + 5) - tie_term) / 18.0
+    if var_s_override is not None and var_s_override > 0:
+        var_s = float(var_s_override)
+    else:
+        unique_vals, counts = np.unique(y_clean, return_counts=True)
+        ties = counts[counts > 1]
+        tie_term = np.sum(ties * (ties - 1) * (2 * ties + 5))
+        var_s = (n * (n - 1) * (2 * n + 5) - tie_term) / 18.0
+        if eta_factor > 1.0:
+            var_s *= eta_factor
 
     z_crit = stats.norm.ppf(1.0 - alpha / 2.0)
     c_alpha = z_crit * np.sqrt(var_s)
 
-    m1 = max(0, int((n_slopes - c_alpha) / 2.0))
-    m2 = min(n_slopes - 1, int((n_slopes + c_alpha) / 2.0))
+    m1 = max(0, int(np.floor((n_slopes - c_alpha) / 2.0)))
+    m2 = min(n_slopes - 1, int(np.ceil((n_slopes + c_alpha) / 2.0)))
 
     ci_lower = float(slopes[m1])
     ci_upper = float(slopes[m2])
@@ -118,5 +131,6 @@ def theil_sen_estimator(
         "intercept": round(intercept, 4),
         "pct_change_total": round(pct_change, 2),
         "mean_value": round(mean_val, 4),
+        "var_s_used": round(float(var_s), 4),
         "alpha": alpha
     }

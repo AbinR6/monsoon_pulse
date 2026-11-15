@@ -162,7 +162,7 @@ export default function HmvSection({ districtData, selectedDistrict, sensitivity
               <Bar dataKey="z_lst" name="Z_LST (Temperature)" fill="#f43f5e" opacity={0.6} />
               <Bar dataKey="z_smap" name="Z_SMAP (Soil Moisture)" fill="#06b6d4" opacity={0.6} />
               <Bar dataKey="z_ndvi" name="Z_NDVI (Vegetation)" fill="#10b981" opacity={0.6} />
-              <Line type="monotone" dataKey="hmv" name="HMV Composite" stroke="#f59e0b" strokeWidth={3.5} dot={{ r: 5, fill: '#f59e0b' }} />
+              <Line type="monotone" dataKey="hmv" name="HMV Composite" stroke="#f59e0b" strokeWidth={3.5} dot={{ r: 5, fill: '#f59e0b' }} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

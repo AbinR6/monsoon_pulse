@@ -112,14 +112,20 @@ export default function SoilMoistureSection({ districtData, selectedDistrict }) 
 
         <StatCard
           title="Statistical Significance"
-          value={stats?.significance_class?.includes('Significant') ? 'Significant' : 'Stable'}
+          value={
+            stats?.q_value !== undefined && stats?.q_value < 0.05
+              ? 'FDR Significant'
+              : stats?.p_value !== undefined && stats?.p_value < 0.05
+              ? 'Marginal (Unadj Sig)'
+              : 'Not Significant'
+          }
           unit=""
-          subtitle={`FDR-adjusted (q = ${stats?.q_value})`}
+          subtitle={`FDR-adjusted (q = ${stats?.q_value ?? '—'})`}
           icon={ShieldCheck}
           color="violet"
           trendBadge={
             <span className="text-xs text-slate-400 font-mono">
-              p: {stats?.p_value} • Z: {stats?.z_statistic}
+              p: {stats?.p_value ?? '—'} • Z: {stats?.z_statistic ?? '—'}
             </span>
           }
         />
@@ -133,7 +139,7 @@ export default function SoilMoistureSection({ districtData, selectedDistrict }) 
               SMAP Root-Zone Soil Moisture Time Series (2015–2024) — {selectedDistrict}
             </h3>
             <p className="text-xs text-slate-400">
-              Note the severe saturation spikes in 2018 and 2019 preceding major regional flood events.
+              Satellite observation of sub-surface volumetric water content (0–100 cm depth). Note saturation peaks during high-monsoon years.
             </p>
           </div>
         </div>
@@ -143,11 +149,20 @@ export default function SoilMoistureSection({ districtData, selectedDistrict }) 
             <ComposedChart data={smapSeries} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="year" stroke="#64748b" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#06b6d4" tick={{ fontSize: 11 }} domain={['dataMin - 0.03', 'dataMax + 0.03']} label={{ value: 'Soil Moisture (m³/m³)', angle: -90, position: 'insideLeft', fill: '#06b6d4', fontSize: 11 }} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} />
+              <YAxis 
+                stroke="#06b6d4" 
+                tick={{ fontSize: 11 }} 
+                domain={[0.15, 0.45]} 
+                tickFormatter={(val) => Number(val).toFixed(3)}
+                label={{ value: 'Soil Moisture (m³/m³)', angle: -90, position: 'insideLeft', fill: '#06b6d4', fontSize: 11 }} 
+              />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} 
+                formatter={(val) => [Number(val).toFixed(4) + ' m³/m³', 'Soil Moisture']}
+              />
               <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-              <Area type="monotone" dataKey="soil_moisture" name="Root-Zone Moisture (m³/m³)" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.2} />
-              <Line type="monotone" dataKey="soil_moisture" name="Annual Mean Moisture" stroke="#22d3ee" strokeWidth={3} dot={{ r: 5 }} />
+              <Area type="monotone" dataKey="soil_moisture" name="Root-Zone Moisture (m³/m³)" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.2} connectNulls={false} />
+              <Line type="monotone" dataKey="soil_moisture" name="Annual Mean Moisture" stroke="#22d3ee" strokeWidth={3} dot={{ r: 5 }} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

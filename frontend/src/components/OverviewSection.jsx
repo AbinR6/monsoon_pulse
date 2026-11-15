@@ -189,8 +189,8 @@ export default function OverviewSection({
               <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800 flex items-start gap-3">
                 <span className="font-mono text-cyan-400 font-bold">25–30s</span>
                 <div>
-                  <strong className="text-slate-200 block">Verified Scientific Discovery</strong>
-                  <span className="text-slate-400">Highland Western Ghats (Wayanad, Idukki) exhibit compounded hydro-topographical risk spikes during extreme monsoon bursts.</span>
+                  <strong className="text-slate-200 block">Statistically Evaluated Environmental Intelligence</strong>
+                  <span className="text-slate-400">Highland Western Ghats (Wayanad, Idukki) exhibit compounded hydro-topographical exposure spikes during extreme monsoon bursts.</span>
                 </div>
               </div>
             </div>

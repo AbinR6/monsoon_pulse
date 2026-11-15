@@ -30,6 +30,7 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
 
   const statR95p = stats?.r95p_annual;
   const statJjas = stats?.prcptot_jjas;
+  const thresholdP95 = statR95p?.threshold_p95_mm ?? lastYear?.threshold_p95_mm ?? timeSeries.find((d) => d.threshold_p95_mm)?.threshold_p95_mm;
 
   return (
     <div className="space-y-6">
@@ -60,7 +61,7 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
           title="R95p Extreme Rain (2024)"
           value={lastYear?.r95p_annual_mm ?? '—'}
           unit="mm"
-          subtitle={`Precipitation on days > P95 threshold`}
+          subtitle={`Precipitation on days > P95 threshold (${thresholdP95 ? thresholdP95 + ' mm/day' : '—'})`}
           icon={CloudRain}
           color="blue"
           trendBadge={
@@ -93,15 +94,15 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
         />
 
         <StatCard
-          title="R95p Fraction of Total"
+          title="R95pTOT Fraction of Total"
           value={lastYear?.r95p_fraction_pct ?? '—'}
           unit="%"
-          subtitle={`Proportion of annual rain from extremes`}
+          subtitle={`ETCCDI R95pTOT: proportion of annual rain from extremes`}
           icon={Sparkles}
           color="amber"
           trendBadge={
             <span className="text-xs text-slate-400 font-mono">
-              Total Rain: {lastYear?.prcptot_annual_mm} mm
+              Total Rain: {lastYear?.prcptot_annual_mm ?? '—'} mm
             </span>
           }
         />
@@ -115,7 +116,7 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
           color="rose"
           trendBadge={
             <span className="text-xs text-slate-400 font-mono">
-              Extreme Days (P &gt; P95): {lastYear?.extreme_days_count} days
+              Extreme Days (P &gt; P95): {lastYear?.extreme_days_count ?? '—'} days
             </span>
           }
         />
@@ -132,8 +133,8 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
               Notice the extreme rainfall spikes during the 2018 Great Flood, 2019 landslides, and 2024 bursts.
             </p>
           </div>
-          <span className="text-xs font-mono text-cyan-400 bg-cyan-950 px-2 py-1 rounded border border-cyan-800">
-            P95 Baseline: {lastYear?.threshold_p95_mm || '—'} mm/day
+          <span className="text-xs font-mono text-cyan-400 bg-cyan-950 px-2.5 py-1 rounded border border-cyan-800">
+            District P95 Baseline: <strong className="text-cyan-200">{thresholdP95 ? `${thresholdP95} mm/day` : '—'}</strong>
           </span>
         </div>
 
@@ -148,9 +149,9 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
               <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
               <Bar yAxisId="left" dataKey="prcptot_annual_mm" name="Annual Total Rain (mm)" fill="#0284c7" opacity={0.65} />
               <Bar yAxisId="left" dataKey="prcptot_jjas_mm" name="JJAS Monsoon Rain (mm)" fill="#0ea5e9" opacity={0.85} />
-              <Line yAxisId="left" type="monotone" dataKey="r95p_annual_mm" name="R95p Annual (mm)" stroke="#f43f5e" strokeWidth={3} dot={{ r: 3 }} />
-              <Line yAxisId="left" type="monotone" dataKey="r95p_jjas_mm" name="R95p JJAS Monsoon (mm)" stroke="#a855f7" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} />
-              <Line yAxisId="right" type="monotone" dataKey="r95p_fraction_pct" name="R95p Fraction (%)" stroke="#f59e0b" strokeWidth={2} dot={false} />
+              <Line yAxisId="left" type="monotone" dataKey="r95p_annual_mm" name="R95p Annual (mm)" stroke="#f43f5e" strokeWidth={3} dot={{ r: 3 }} connectNulls={false} />
+              <Line yAxisId="left" type="monotone" dataKey="r95p_jjas_mm" name="R95p JJAS Monsoon (mm)" stroke="#a855f7" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 2 }} connectNulls={false} />
+              <Line yAxisId="right" type="monotone" dataKey="r95p_fraction_pct" name="R95pTOT Fraction (%)" stroke="#f59e0b" strokeWidth={2} dot={false} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
@@ -160,21 +161,28 @@ export default function RainfallSection({ districtData, selectedDistrict }) {
       <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-5 text-xs text-slate-300 space-y-2">
         <h4 className="font-bold text-sm text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
           <Info className="w-4 h-4" />
-          ETCCDI Scientific R95p Definition & Methodology
+          ETCCDI Scientific R95p & R95pTOT Methodology
         </h4>
         <p className="leading-relaxed">
           The Expert Team on Climate Change Detection and Indices (ETCCDI) defines <strong>R95p</strong> as the annual accumulated 
           precipitation on wet days (daily rainfall <span className="font-mono text-cyan-300">&ge; 1.0 mm</span>) that exceeds 
-          the 95th percentile of wet-day rainfall during a defined baseline reference period (here, <strong className="text-slate-100">2001–2020</strong>).
+          the district-specific 95th percentile (P95) calculated from baseline wet days (<strong className="text-slate-100">2001–2020</strong>).
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 font-mono text-[11px] text-slate-300">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 font-mono text-[11px] text-slate-300">
           <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
-            <strong>Annual R95p Formula:</strong>
-            <div className="text-cyan-300 mt-1">R95p = &sum; [ P_d for d &in; wet_days where P_d &gt; P_95 ]</div>
+            <strong>Annual R95p (mm):</strong>
+            <div className="text-cyan-300 mt-1">R95p = &sum; [ P_d | P_d &gt; P_95 ]</div>
+            <div className="text-[10px] text-slate-400 mt-1">Total depth from very wet days</div>
           </div>
           <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
-            <strong>JJAS Monsoon R95p Formula:</strong>
-            <div className="text-cyan-300 mt-1">R95p_JJAS = &sum; [ P_d for d &in; JJAS_wet_days where P_d &gt; P_95 ]</div>
+            <strong>JJAS Monsoon R95p (mm):</strong>
+            <div className="text-cyan-300 mt-1">R95p_JJAS = &sum; [ P_d,JJAS | P_d &gt; P_95 ]</div>
+            <div className="text-[10px] text-slate-400 mt-1">SW-monsoon extreme depth</div>
+          </div>
+          <div className="p-2.5 rounded bg-slate-900 border border-slate-800">
+            <strong>R95pTOT Fraction (%):</strong>
+            <div className="text-amber-300 mt-1">R95pTOT = (R95p / PRCPTOT) &times; 100%</div>
+            <div className="text-[10px] text-slate-400 mt-1">Extreme contribution fraction</div>
           </div>
         </div>
       </div>

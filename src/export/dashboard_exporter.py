@@ -114,13 +114,28 @@ class DashboardExporter:
                 vals = sub[val_col].values
                 years = sub[time_col].values
 
-                # Autocorrelation check
-                autocorr = assess_autocorrelation(vals)
-                lag1 = autocorr["lag1_autocorr"]
+                # Preliminary Theil-Sen slope for detrending residuals
+                ts_prelim = theil_sen_estimator(vals, years)
+                slope_prelim = ts_prelim["slope"]
 
-                # Mann-Kendall with serial correlation flag
-                mk = mann_kendall_test(vals, modified_for_autocorr=autocorr["is_significant"], lag1_autocorr=lag1)
-                ts = theil_sen_estimator(vals, years)
+                # Autocorrelation assessment on detrended residuals (Yue & Wang 2004)
+                autocorr = assess_autocorrelation(vals, theil_sen_slope=slope_prelim)
+                lag1 = autocorr["lag1_autocorr"]
+                eta = autocorr["variance_correction_factor_eta"]
+
+                # Modified Mann-Kendall with Yue & Wang variance inflation
+                mk = mann_kendall_test(
+                    vals, 
+                    modified_for_autocorr=autocorr["is_significant"], 
+                    variance_correction_factor_eta=eta
+                )
+
+                # Consistent Theil-Sen confidence intervals using Var*(S)
+                ts = theil_sen_estimator(
+                    vals, 
+                    years, 
+                    var_s_override=mk["var_s_star"]
+                )
 
                 test_record = {
                     "district": dist,
@@ -130,6 +145,9 @@ class DashboardExporter:
                     "observation_period": f"{y_start}–{y_end}",
                     "n_observations": int(mk["n_observations"]),
                     "s_statistic": float(mk["s_statistic"]),
+                    "var_s": float(mk["var_s"]),
+                    "var_s_star": float(mk["var_s_star"]),
+                    "eta_factor": float(mk["eta_factor"]),
                     "z_statistic": float(mk["z_statistic"]),
                     "kendalls_tau": float(mk["kendalls_tau"]),
                     "p_value": float(mk["p_value"]),
@@ -144,6 +162,9 @@ class DashboardExporter:
                     "autocorr_significant": bool(autocorr["is_significant"]),
                     "trend_direction": mk["trend"]
                 }
+                if var_key == "r95p_annual":
+                    test_record["threshold_p95_mm"] = float(sub["threshold_p95_mm"].iloc[0]) if "threshold_p95_mm" in sub.columns else None
+
                 dist_stats[var_key] = test_record
                 all_test_records.append(test_record)
 
@@ -159,6 +180,7 @@ class DashboardExporter:
             for yr in range(2001, 2025):
                 row = {
                     "year": yr,
+                    "threshold_p95_mm": float(dist_r95p.loc[yr, "threshold_p95_mm"]) if yr in dist_r95p.index and "threshold_p95_mm" in dist_r95p.columns else None,
                     "r95p_annual_mm": float(dist_r95p.loc[yr, "r95p_annual_mm"]) if yr in dist_r95p.index else None,
                     "r95p_jjas_mm": float(dist_r95p.loc[yr, "r95p_jjas_mm"]) if yr in dist_r95p.index else None,
                     "r95p_fraction_pct": float(dist_r95p.loc[yr, "r95p_fraction_pct"]) if yr in dist_r95p.index else None,

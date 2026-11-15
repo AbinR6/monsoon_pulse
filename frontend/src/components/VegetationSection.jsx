@@ -100,14 +100,20 @@ export default function VegetationSection({ districtData, selectedDistrict }) {
 
         <StatCard
           title="Statistical Significance"
-          value={stats?.significance_class?.includes('Significant') ? 'Significant' : 'Stable'}
+          value={
+            stats?.q_value !== undefined && stats?.q_value < 0.05
+              ? 'FDR Significant'
+              : stats?.p_value !== undefined && stats?.p_value < 0.05
+              ? 'Marginal (Unadj Sig)'
+              : 'Not Significant'
+          }
           unit=""
-          subtitle={`FDR-adjusted (q = ${stats?.q_value})`}
+          subtitle={`FDR-adjusted (q = ${stats?.q_value ?? '—'})`}
           icon={ShieldCheck}
           color="violet"
           trendBadge={
             <span className="text-xs text-slate-400 font-mono">
-              p: {stats?.p_value} • &tau;: {stats?.kendalls_tau}
+              p: {stats?.p_value ?? '—'} • &tau;: {stats?.kendalls_tau ?? '—'}
             </span>
           }
         />
@@ -121,7 +127,7 @@ export default function VegetationSection({ districtData, selectedDistrict }) {
               Historical Vegetation Greenness NDVI ({selectedDistrict})
             </h3>
             <p className="text-xs text-slate-400">
-              Notice the vegetative resilience and the distinct greenness reduction during the 2016 drought.
+              MODIS MOD13Q1 250m canopy greenness (2001–2024). Reflects tropical forest phenology and drought responses (such as 2016).
             </p>
           </div>
         </div>
@@ -131,11 +137,20 @@ export default function VegetationSection({ districtData, selectedDistrict }) {
             <ComposedChart data={timeSeries} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="year" stroke="#64748b" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#10b981" tick={{ fontSize: 11 }} domain={['dataMin - 0.05', 'dataMax + 0.05']} label={{ value: 'NDVI', angle: -90, position: 'insideLeft', fill: '#10b981', fontSize: 11 }} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} />
+              <YAxis 
+                stroke="#10b981" 
+                tick={{ fontSize: 11 }} 
+                domain={[0.40, 0.90]} 
+                tickFormatter={(val) => Number(val).toFixed(2)}
+                label={{ value: 'NDVI', angle: -90, position: 'insideLeft', fill: '#10b981', fontSize: 11 }} 
+              />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} 
+                formatter={(val) => [Number(val).toFixed(3), 'NDVI']}
+              />
               <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-              <Area type="monotone" dataKey="ndvi" name="NDVI Canopy Greenness" stroke="#10b981" fill="#10b981" fillOpacity={0.15} />
-              <Line type="monotone" dataKey="ndvi" name="Annual Mean NDVI" stroke="#34d399" strokeWidth={3} dot={{ r: 4 }} />
+              <Area type="monotone" dataKey="ndvi" name="NDVI Canopy Greenness" stroke="#10b981" fill="#10b981" fillOpacity={0.15} connectNulls={false} />
+              <Line type="monotone" dataKey="ndvi" name="Annual Mean NDVI" stroke="#34d399" strokeWidth={3} dot={{ r: 4 }} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
